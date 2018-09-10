@@ -144,7 +144,7 @@ class FlaskView(object):
                 if hasattr(value, "_rule_cache") and name in value._rule_cache:
                     for idx, cached_rule in enumerate(value._rule_cache[name]):
                         rule, options = cached_rule
-                        rule = cls.build_rule(rule)
+                        rule = cls.build_rule(rule,name)
                         sub, ep, options = cls.parse_options(options)
 
                         if not subdomain and sub:
@@ -164,7 +164,7 @@ class FlaskView(object):
                 elif name in cls.special_methods:
                     methods = cls.special_methods[name]
 
-                    rule = cls.build_rule("/", value)
+                    rule = cls.build_rule("/", value,name)
                     if not cls.trailing_slash and rule != '/':
                         rule = rule.rstrip("/")
                     elif cls.trailing_slash is True and rule.endswith('/') is False:
@@ -321,7 +321,7 @@ class FlaskView(object):
         return proxy
 
     @classmethod
-    def build_rule(cls, rule, method=None):
+    def build_rule(cls, rule, method=None,name=None):
         """Creates a routing rule based on either the class name (minus the
         'View' suffix) or the defined `route_base` attribute of the class
 
@@ -348,7 +348,11 @@ class FlaskView(object):
             ignored_rule_args += cls.base_args
 
         if method and getattr(cls, 'inspect_args', True):
-            argspec = get_true_argspec(method)
+            if getattr(cls,'use_explicit_args',False) and name:
+                explicit_args = getattr(cls,'explicit_args')
+                argspec = explicit_args.get(name)
+            else:
+                argspec = get_true_argspec(method)
             args = argspec[0]
             query_params = argspec[3]  # All default args should be ignored
             annotations = getattr(argspec, 'annotations', {})
