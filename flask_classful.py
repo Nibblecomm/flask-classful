@@ -19,7 +19,7 @@ import re
 
 _py2 = sys.version_info[0] == 2
 
-__version__ = "0.15.0-dev0"
+__version__ = "0.15.1-dev0"
 
 
 def route(rule, **options):
@@ -144,7 +144,7 @@ class FlaskView(object):
                 if hasattr(value, "_rule_cache") and name in value._rule_cache:
                     for idx, cached_rule in enumerate(value._rule_cache[name]):
                         rule, options = cached_rule
-                        rule = cls.build_rule(rule,name)
+                        rule = cls.build_rule(rule,name=name)
                         sub, ep, options = cls.parse_options(options)
 
                         if not subdomain and sub:
@@ -164,7 +164,7 @@ class FlaskView(object):
                 elif name in cls.special_methods:
                     methods = cls.special_methods[name]
 
-                    rule = cls.build_rule("/", value,name)
+                    rule = cls.build_rule("/", value,name=name)
                     if not cls.trailing_slash and rule != '/':
                         rule = rule.rstrip("/")
                     elif cls.trailing_slash is True and rule.endswith('/') is False:
@@ -183,7 +183,7 @@ class FlaskView(object):
                     route_str = '/{0!s}/'.format(name)
                     if not cls.trailing_slash:
                         route_str = route_str.rstrip('/')
-                    rule = cls.build_rule(route_str, value)
+                    rule = cls.build_rule(route_str, value,name=name)
                     if cls.trailing_slash is True and rule.endswith('/') is False:
                         rule = '{0!s}/'.format(rule)
                     # print '3 - {0!s}'.format(rule)
